@@ -45,9 +45,12 @@
             ProcessLbl = new System.Windows.Forms.Label();
             DelayTmr = new System.Windows.Forms.Timer(components);
             ProcessTmr = new System.Windows.Forms.Timer(components);
+            MenuStrp = new System.Windows.Forms.MenuStrip();
+            AboutMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             ProcessGroupBx.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)DelayBx).BeginInit();
             ((System.ComponentModel.ISupportInitialize)PIDBx).BeginInit();
+            MenuStrp.SuspendLayout();
             SuspendLayout();
             // 
             // ProcessGroupBx
@@ -64,7 +67,7 @@
             ProcessGroupBx.Controls.Add(PIDBx);
             ProcessGroupBx.Controls.Add(ProcessBx);
             ProcessGroupBx.Controls.Add(ProcessLbl);
-            ProcessGroupBx.Location = new System.Drawing.Point(12, 12);
+            ProcessGroupBx.Location = new System.Drawing.Point(13, 28);
             ProcessGroupBx.Name = "ProcessGroupBx";
             ProcessGroupBx.Size = new System.Drawing.Size(495, 145);
             ProcessGroupBx.TabIndex = 0;
@@ -218,14 +221,32 @@
             ProcessTmr.Interval = 1500;
             ProcessTmr.Tick += ProcessTmr_Tick;
             // 
+            // MenuStrp
+            // 
+            MenuStrp.Items.AddRange(new System.Windows.Forms.ToolStripItem[] { AboutMenuItem });
+            MenuStrp.Location = new System.Drawing.Point(0, 0);
+            MenuStrp.Name = "MenuStrp";
+            MenuStrp.Size = new System.Drawing.Size(522, 24);
+            MenuStrp.TabIndex = 1;
+            MenuStrp.Text = "menuStrip1";
+            // 
+            // AboutMenuItem
+            // 
+            AboutMenuItem.Name = "AboutMenuItem";
+            AboutMenuItem.Size = new System.Drawing.Size(52, 20);
+            AboutMenuItem.Text = "About";
+            AboutMenuItem.Click += AboutMenuItem_Click;
+            // 
             // MainFrm
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(522, 171);
+            ClientSize = new System.Drawing.Size(522, 186);
             Controls.Add(ProcessGroupBx);
+            Controls.Add(MenuStrp);
             FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedSingle;
             Icon = (System.Drawing.Icon)resources.GetObject("$this.Icon");
+            MainMenuStrip = MenuStrp;
             MaximizeBox = false;
             Name = "MainFrm";
             StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
@@ -235,7 +256,10 @@
             ProcessGroupBx.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)DelayBx).EndInit();
             ((System.ComponentModel.ISupportInitialize)PIDBx).EndInit();
+            MenuStrp.ResumeLayout(false);
+            MenuStrp.PerformLayout();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -255,5 +279,7 @@
         private System.Windows.Forms.Timer DelayTmr;
         private System.Windows.Forms.Label StatusLbl;
         private System.Windows.Forms.Timer ProcessTmr;
+        private System.Windows.Forms.MenuStrip MenuStrp;
+        private System.Windows.Forms.ToolStripMenuItem AboutMenuItem;
     }
 }

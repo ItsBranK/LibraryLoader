@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using LibraryLoader.Framework;
 using System.Configuration;
+using LibraryLoader.Forms;
 
 namespace LibraryLoader
 {
@@ -20,22 +21,11 @@ namespace LibraryLoader
 
     public partial class MainFrm : Form
     {
-        private static bool _x64Bit = true;
         private static StatusTypes _status = StatusTypes.NoProcess;
         private static bool _autoLoad = false;
         private static string _libraryFile = "";
         private static string _processName = "";
         private static Int32 _processId = 0;
-
-        private string GetTitleName()
-        {
-            if (_x64Bit)
-            {
-                return "ItsBranK's Library Loader (x64)";
-            }
-
-            return "ItsBranK's Library Loader (x32)";
-        }
 
         public MainFrm()
         {
@@ -44,10 +34,16 @@ namespace LibraryLoader
 
         private void MainFrm_Load(object sender, EventArgs e)
         {
-            this.Text = GetTitleName();
+            this.Text = Assembly.GetTitle();
             LoadProcesses();
             SetStatus(StatusTypes.NoFile);
             ProcessTmr.Start();
+        }
+
+        private void AboutMenuItem_Click(object sender, EventArgs e)
+        {
+            AboutFrm aboutFrm = new AboutFrm();
+            aboutFrm.Show();
         }
 
         private void ProcessBx_SelectedValueChanged(object sender, EventArgs e)
@@ -170,7 +166,7 @@ namespace LibraryLoader
             }
             else if (process == null)
             {
-                this.Text = GetTitleName();
+                this.Text = Assembly.GetTitle();
                 LoadBtn.Enabled = false;
                 DelayTmr.Stop();
                 FLoader.ClearHandleCache();
@@ -316,7 +312,7 @@ namespace LibraryLoader
 
                         if (result == InjectionResults.Success)
                         {
-                            this.Text = (GetTitleName() + " - " + _processName);
+                            this.Text = (Assembly.GetTitle() + " - " + _processName);
                             SetStatus(StatusTypes.LoadSuccess);
                             LoadBtn.Enabled = false;
                         }
