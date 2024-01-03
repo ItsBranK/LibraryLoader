@@ -14,7 +14,7 @@ namespace LibraryLoader.Forms
 
         private void AboutFrm_Load(object sender, EventArgs e)
         {
-            this.Text = Assembly.GetTitle();
+            this.Text = (Assembly.GetTitle() + " - About");
             ArchetypeLbl.Text = (Assembly.Is64Bit() ? "x64" : "x86");
             VersionLbl.Text = ("v" + Assembly.GetVersion());
         }
