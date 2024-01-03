@@ -1,7 +1,7 @@
 # ItsBranK's Library Loader v1.0
 ### .NET 8.0 Windows
 
-A very simple and easy to use dll injector that uses the LoadLibraryA function.
+A very simple and easy to use DLL injector that uses the LoadLibraryA function.
 
 # Features
 
