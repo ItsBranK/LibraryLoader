@@ -145,23 +145,20 @@ namespace LibraryLoader
 
             if (ShouldInject() && (process != null))
             {
-                if ((_status != StatusTypes.LoadSuccess) && (_status != StatusTypes.LoadFailure))
-                {
-                    LoadBtn.Enabled = true;
+                LoadBtn.Enabled = true;
 
-                    if (_autoLoad)
+                if (_autoLoad)
+                {
+                    if ((_status != StatusTypes.DelayingLoad) && !string.IsNullOrEmpty(_processName))
                     {
-                        if ((_status != StatusTypes.DelayingLoad) && !string.IsNullOrEmpty(_processName))
-                        {
-                            SetStatus(StatusTypes.DelayingLoad);
-                            DelayTmr.Start();
-                        }
+                        SetStatus(StatusTypes.DelayingLoad);
+                        DelayTmr.Start();
                     }
-                    else
-                    {
-                        DelayTmr.Stop();
-                        SetStatus(StatusTypes.FoundProcess);
-                    }
+                }
+                else
+                {
+                    DelayTmr.Stop();
+                    SetStatus(StatusTypes.FoundProcess);
                 }
             }
             else if (process == null)
@@ -290,7 +287,7 @@ namespace LibraryLoader
 
         private bool ShouldInject()
         {
-            if (!string.IsNullOrEmpty(_libraryFile) && (_status != StatusTypes.LoadSuccess))
+            if (!string.IsNullOrEmpty(_libraryFile) && (_status != StatusTypes.LoadSuccess) && (_status != StatusTypes.LoadFailure))
             {
                 return ((_autoLoad && !string.IsNullOrEmpty(_processName)) || (_processId != 0));
             }
@@ -310,7 +307,7 @@ namespace LibraryLoader
                     {
                         InjectionResults result = FLoader.LoadLibrary(process, _libraryFile);
 
-                        if (result == InjectionResults.Success)
+                        if ((result == InjectionResults.Success) || (result == InjectionResults.AlreadyInjected))
                         {
                             this.Text = (Assembly.GetTitle() + " - " + _processName);
                             SetStatus(StatusTypes.LoadSuccess);
