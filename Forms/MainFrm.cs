@@ -113,11 +113,12 @@ namespace LibraryLoader
                     FileBx.Text = fileInfo.FullName;
                     FileBx.Enabled = false;
                     _libraryFile = FileBx.Text;
-                    LoadBtn.Enabled = true;
-                    return;
+                    SetStatus(StatusTypes.NoProcess);
                 }
-
-                SetStatus(StatusTypes.NoFile);
+                else
+                {
+                    SetStatus(StatusTypes.NoFile);
+                }
             }
         }
 
@@ -128,7 +129,9 @@ namespace LibraryLoader
 
         private void AutoBx_CheckedChanged(object sender, EventArgs e)
         {
+            ProcessTmr.Stop();
             _autoLoad = AutoBx.Checked;
+            ProcessTmr.Start();
         }
 
         private void LoadBtn_Click(object sender, EventArgs e)
@@ -146,6 +149,7 @@ namespace LibraryLoader
             if (ShouldInject() && (process != null))
             {
                 LoadBtn.Enabled = true;
+                AutoBx.Enabled = true;
 
                 if (_autoLoad)
                 {
@@ -163,10 +167,7 @@ namespace LibraryLoader
             }
             else if (process == null)
             {
-                this.Text = Assembly.GetTitle();
-                LoadBtn.Enabled = false;
                 DelayTmr.Stop();
-                FLoader.ClearHandleCache();
 
                 if (string.IsNullOrEmpty(_libraryFile))
                 {
@@ -214,6 +215,14 @@ namespace LibraryLoader
                     StatusLbl.Text = "Failed to loaded the file!";
                     break;
             }
+
+            if ((_status == StatusTypes.NoFile) || (_status == StatusTypes.NoProcess))
+            {
+                this.Text = Assembly.GetTitle();
+                FLoader.ClearHandleCache();
+                LoadBtn.Enabled = false;
+                AutoBx.Enabled = true;
+            }
         }
 
         private Process? FindSelectedProcess()
@@ -238,7 +247,6 @@ namespace LibraryLoader
             PIDBx.Value = 0;
             _processId = 0;
             SetStatus(StatusTypes.NoProcess);
-            FLoader.ClearHandleCache();
 
             Process[] processList = Process.GetProcesses();
             List<string> processNames = new List<string>();
@@ -281,6 +289,12 @@ namespace LibraryLoader
 
                 ProcessBx.Text = processEntry;
                 PIDBx.Value = process.Id;
+
+                if (_processId != process.Id)
+                {
+                    SetStatus(StatusTypes.NoProcess);
+                }
+
                 _processId = process.Id;
             }
         }
@@ -312,17 +326,20 @@ namespace LibraryLoader
                             this.Text = (Assembly.GetTitle() + " - " + _processName);
                             SetStatus(StatusTypes.LoadSuccess);
                             LoadBtn.Enabled = false;
+                            AutoBx.Enabled = false;
                         }
                         else
                         {
                             SetStatus(StatusTypes.LoadFailure);
                             LoadBtn.Enabled = true;
+                            AutoBx.Enabled = true;
                         }
                     }
                     else
                     {
                         SetStatus(StatusTypes.NoProcess);
                         LoadBtn.Enabled = false;
+                        AutoBx.Enabled = true;
                     }
                 }
                 else
@@ -330,11 +347,8 @@ namespace LibraryLoader
                     SetStatus(StatusTypes.NoFile);
                     _libraryFile = "";
                     LoadBtn.Enabled = false;
+                    AutoBx.Enabled = true;
                 }
-            }
-            else
-            {
-                LoadBtn.Enabled = false;
             }
         }
     }
