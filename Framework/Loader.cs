@@ -85,7 +85,7 @@ namespace LibraryLoader.Framework
 
     public static class FLoader
     {
-        private static List<IntPtr> _handleCache = new List<IntPtr>(); // Handle cache for processes we've already loaded into.
+        private static List<IntPtr> m_handleCache = new List<IntPtr>(); // Handle cache for processes we've already loaded into.
 
         [DllImport("kernel32.dll", SetLastError = true)]
         static extern int WriteProcessMemory(IntPtr hProcess, IntPtr lpBaseAddress, byte[] buffer, UInt32 size, Int32 lpNumberOfBytesWritten);
@@ -111,7 +111,7 @@ namespace LibraryLoader.Framework
 
         public static void ClearHandleCache()
         {
-            _handleCache.Clear();
+            m_handleCache.Clear();
         }
 
         public static bool IsModuleLoaded(Process process, string keyword, bool bForceCheck)
@@ -126,9 +126,9 @@ namespace LibraryLoader.Framework
                     {
                         if (module.FileName.Contains(keyword))
                         {
-                            if (!_handleCache.Contains(process.Handle))
+                            if (!m_handleCache.Contains(process.Handle))
                             {
-                                _handleCache.Add(process.Handle);
+                                m_handleCache.Add(process.Handle);
                             }
 
                             return true;
@@ -137,14 +137,14 @@ namespace LibraryLoader.Framework
                 }
                 else
                 {
-                    return _handleCache.Contains(process.Handle);
+                    return m_handleCache.Contains(process.Handle);
                 }
             }
 
             return false;
         }
 
-        // Attempts to load a library into an individual process, adds to the "_handleCache" list but does NOT remove old handles.
+        // Attempts to load a library into an individual process, adds to the "m_handleCache" list but does NOT remove old handles.
         public static InjectionResults LoadLibrary(Process process, string libraryFile)
         {
             if (File.Exists(libraryFile))
@@ -157,7 +157,7 @@ namespace LibraryLoader.Framework
 
                         if (result == InjectionResults.Success)
                         {
-                            _handleCache.Add(process.Handle);
+                            m_handleCache.Add(process.Handle);
                         }
 
                         return result;

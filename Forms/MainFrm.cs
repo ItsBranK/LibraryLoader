@@ -1,10 +1,9 @@
 ﻿using System;
+using System.IO;
 using System.Diagnostics;
 using System.Windows.Forms;
 using System.Collections.Generic;
-using System.IO;
 using LibraryLoader.Framework;
-using System.Configuration;
 using LibraryLoader.Forms;
 
 namespace LibraryLoader
@@ -21,11 +20,11 @@ namespace LibraryLoader
 
     public partial class MainFrm : Form
     {
-        private static StatusTypes _status = StatusTypes.NoProcess;
-        private static bool _autoLoad = false;
-        private static string _libraryFile = "";
-        private static string _processName = "";
-        private static Int32 _processId = 0;
+        private static StatusTypes m_status = StatusTypes.NoProcess;
+        private static bool m_autoLoad = false;
+        private static string m_libraryFile = "";
+        private static string m_processName = "";
+        private static Int32 m_processId = 0;
 
         public MainFrm()
         {
@@ -112,7 +111,7 @@ namespace LibraryLoader
                     FileBx.Enabled = true;
                     FileBx.Text = fileInfo.FullName;
                     FileBx.Enabled = false;
-                    _libraryFile = FileBx.Text;
+                    m_libraryFile = FileBx.Text;
                     SetStatus(StatusTypes.NoProcess);
                 }
                 else
@@ -130,7 +129,7 @@ namespace LibraryLoader
         private void AutoBx_CheckedChanged(object sender, EventArgs e)
         {
             ProcessTmr.Stop();
-            _autoLoad = AutoBx.Checked;
+            m_autoLoad = AutoBx.Checked;
             ProcessTmr.Start();
         }
 
@@ -151,9 +150,9 @@ namespace LibraryLoader
                 LoadBtn.Enabled = true;
                 AutoBx.Enabled = true;
 
-                if (_autoLoad)
+                if (m_autoLoad)
                 {
-                    if ((_status != StatusTypes.DelayingLoad) && !string.IsNullOrEmpty(_processName))
+                    if ((m_status != StatusTypes.DelayingLoad) && !string.IsNullOrEmpty(m_processName))
                     {
                         SetStatus(StatusTypes.DelayingLoad);
                         DelayTmr.Start();
@@ -169,7 +168,7 @@ namespace LibraryLoader
             {
                 DelayTmr.Stop();
 
-                if (string.IsNullOrEmpty(_libraryFile))
+                if (string.IsNullOrEmpty(m_libraryFile))
                 {
                     SetStatus(StatusTypes.NoFile);
                 }
@@ -182,7 +181,7 @@ namespace LibraryLoader
 
         private void DelayTmr_Tick(object sender, EventArgs e)
         {
-            if (ShouldInject() && (_autoLoad && !string.IsNullOrEmpty(_processName)))
+            if (ShouldInject() && (m_autoLoad && !string.IsNullOrEmpty(m_processName)))
             {
                 InjectFile();
             }
@@ -192,9 +191,9 @@ namespace LibraryLoader
 
         private void SetStatus(StatusTypes status)
         {
-            _status = status;
+            m_status = status;
 
-            switch (_status)
+            switch (m_status)
             {
                 case StatusTypes.NoFile:
                     StatusLbl.Text = "Waiting for user to select a file.";
@@ -216,7 +215,7 @@ namespace LibraryLoader
                     break;
             }
 
-            if ((_status == StatusTypes.NoFile) || (_status == StatusTypes.NoProcess))
+            if ((m_status == StatusTypes.NoFile) || (m_status == StatusTypes.NoProcess))
             {
                 this.Text = Assembly.GetTitle();
                 FLoader.ClearHandleCache();
@@ -227,13 +226,13 @@ namespace LibraryLoader
 
         private Process? FindSelectedProcess()
         {
-            if (_autoLoad && !string.IsNullOrEmpty(_processName))
+            if (m_autoLoad && !string.IsNullOrEmpty(m_processName))
             {
-                return FProcess.GetProcess(_processName);
+                return FProcess.GetProcess(m_processName);
             }
-            else if (_processId != 0)
+            else if (m_processId != 0)
             {
-                return FProcess.GetProcess(_processId);
+                return FProcess.GetProcess(m_processId);
             }
 
             return null;
@@ -242,10 +241,10 @@ namespace LibraryLoader
         private void LoadProcesses()
         {
             AutoBx.Checked = false; // Don't want to inject into a random process, if the user accidently selected the wrong one at first (I've done this a few times).
-            _processName = "";
+            m_processName = "";
             ProcessBx.Items.Clear();
             PIDBx.Value = 0;
-            _processId = 0;
+            m_processId = 0;
             SetStatus(StatusTypes.NoProcess);
 
             Process[] processList = Process.GetProcesses();
@@ -280,30 +279,30 @@ namespace LibraryLoader
 
                 if (!string.IsNullOrEmpty(process.MainWindowTitle))
                 {
-                    _processName = process.MainWindowTitle;
+                    m_processName = process.MainWindowTitle;
                 }
                 else
                 {
-                    _processName = process.ProcessName;
+                    m_processName = process.ProcessName;
                 }
 
                 ProcessBx.Text = processEntry;
                 PIDBx.Value = process.Id;
 
-                if (_processId != process.Id)
+                if (m_processId != process.Id)
                 {
                     SetStatus(StatusTypes.NoProcess);
                 }
 
-                _processId = process.Id;
+                m_processId = process.Id;
             }
         }
 
         private bool ShouldInject()
         {
-            if (!string.IsNullOrEmpty(_libraryFile) && (_status != StatusTypes.LoadSuccess) && (_status != StatusTypes.LoadFailure))
+            if (!string.IsNullOrEmpty(m_libraryFile) && (m_status != StatusTypes.LoadSuccess) && (m_status != StatusTypes.LoadFailure))
             {
-                return ((_autoLoad && !string.IsNullOrEmpty(_processName)) || (_processId != 0));
+                return ((m_autoLoad && !string.IsNullOrEmpty(m_processName)) || (m_processId != 0));
             }
 
             return false;
@@ -313,17 +312,17 @@ namespace LibraryLoader
         {
             if (ShouldInject())
             {
-                if (File.Exists(_libraryFile))
+                if (File.Exists(m_libraryFile))
                 {
                     Process? process = FindSelectedProcess();
 
                     if (process != null)
                     {
-                        InjectionResults result = FLoader.LoadLibrary(process, _libraryFile);
+                        InjectionResults result = FLoader.LoadLibrary(process, m_libraryFile);
 
                         if ((result == InjectionResults.Success) || (result == InjectionResults.AlreadyInjected))
                         {
-                            this.Text = (Assembly.GetTitle() + " - " + _processName);
+                            this.Text = (Assembly.GetTitle() + " - " + m_processName);
                             SetStatus(StatusTypes.LoadSuccess);
                             LoadBtn.Enabled = false;
                             AutoBx.Enabled = false;
@@ -345,7 +344,7 @@ namespace LibraryLoader
                 else
                 {
                     SetStatus(StatusTypes.NoFile);
-                    _libraryFile = "";
+                    m_libraryFile = "";
                     LoadBtn.Enabled = false;
                     AutoBx.Enabled = true;
                 }
