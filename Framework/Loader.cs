@@ -3,7 +3,6 @@ using System.Text;
 using System.Diagnostics;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using System.Configuration;
 using System.IO;
 
 // https://www.pinvoke.net/default.aspx/kernel32.openprocess
@@ -80,6 +79,7 @@ namespace LibraryLoader.Framework
         AllocateFail,
         WriteFail,
         ThreadFail,
+        Exception,
         Success
     }
 
@@ -183,50 +183,57 @@ namespace LibraryLoader.Framework
                 return InjectionResults.LibraryNotFound;
             }
 
-            IntPtr processHandle = OpenProcess(Convert.ToUInt32(ProcessFlags.All), 1, Convert.ToUInt32(process.Id));
-
-            if (processHandle == IntPtr.Zero)
+            try
             {
-                return InjectionResults.HandleNotFound;
-            }
+                IntPtr processHandle = OpenProcess(Convert.ToUInt32(ProcessFlags.All), 1, Convert.ToUInt32(process.Id));
 
-            IntPtr loadLibraryAddress = GetProcAddress(GetModuleHandle("kernel32.dll"), "LoadLibraryA");
+                if (processHandle == IntPtr.Zero)
+                {
+                    return InjectionResults.HandleNotFound;
+                }
 
-            if (loadLibraryAddress == IntPtr.Zero)
-            {
+                IntPtr loadLibraryAddress = GetProcAddress(GetModuleHandle("kernel32.dll"), "LoadLibraryA");
+
+                if (loadLibraryAddress == IntPtr.Zero)
+                {
+                    CloseHandle(processHandle);
+                    return InjectionResults.KernalNotFound;
+                }
+
+                IntPtr allocatedAddress = VirtualAllocEx(processHandle, IntPtr.Zero, new IntPtr(libraryFile.Length), (Convert.ToUInt32(AllocationType.Commit) | Convert.ToUInt32(AllocationType.Reserve)), Convert.ToUInt32(MemoryProtection.ExecuteReadWrite));
+
+                if (allocatedAddress == IntPtr.Zero)
+                {
+                    CloseHandle(processHandle);
+                    return InjectionResults.AllocateFail;
+                }
+
+                byte[] bytes = Encoding.ASCII.GetBytes(libraryFile);
+                int bWroteMemory = WriteProcessMemory(processHandle, allocatedAddress, bytes, Convert.ToUInt32(bytes.Length), 0);
+
+                if (bWroteMemory == 0)
+                {
+                    CloseHandle(processHandle);
+                    return InjectionResults.WriteFail;
+                }
+
+                IntPtr threadHandle = CreateRemoteThread(processHandle, IntPtr.Zero, IntPtr.Zero, loadLibraryAddress, allocatedAddress, 0, IntPtr.Zero);
+
+                if (threadHandle == IntPtr.Zero)
+                {
+                    CloseHandle(processHandle);
+                    return InjectionResults.ThreadFail;
+                }
+
+                CloseHandle(threadHandle);
                 CloseHandle(processHandle);
-                return InjectionResults.KernalNotFound;
+
+                return InjectionResults.Success;
             }
-
-            IntPtr allocatedAddress = VirtualAllocEx(processHandle, IntPtr.Zero, new IntPtr(libraryFile.Length), (Convert.ToUInt32(AllocationType.Commit) | Convert.ToUInt32(AllocationType.Reserve)), Convert.ToUInt32(MemoryProtection.ExecuteReadWrite));
-
-            if (allocatedAddress == IntPtr.Zero)
+            catch
             {
-                CloseHandle(processHandle);
-                return InjectionResults.AllocateFail;
+                return InjectionResults.Exception;
             }
-
-            byte[] bytes = Encoding.ASCII.GetBytes(libraryFile);
-            int bWroteMemory = WriteProcessMemory(processHandle, allocatedAddress, bytes, Convert.ToUInt32(bytes.Length), 0);
-
-            if (bWroteMemory == 0)
-            {
-                CloseHandle(processHandle);
-                return InjectionResults.WriteFail;
-            }
-
-            IntPtr threadHandle = CreateRemoteThread(processHandle, IntPtr.Zero, IntPtr.Zero, loadLibraryAddress, allocatedAddress, 0, IntPtr.Zero);
-
-            if (threadHandle == IntPtr.Zero)
-            {
-                CloseHandle(processHandle);
-                return InjectionResults.ThreadFail;
-            }
-
-            CloseHandle(threadHandle);
-            CloseHandle(processHandle);
-
-            return InjectionResults.Success;
         }
     }
 }

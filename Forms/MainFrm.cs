@@ -211,7 +211,7 @@ namespace LibraryLoader
                     StatusLbl.Text = "Successfully loaded the file!";
                     break;
                 case StatusTypes.LoadFailure:
-                    StatusLbl.Text = "Failed to loaded the file!";
+                    StatusLbl.Text = "Failed to load the file!";
                     break;
             }
 
@@ -230,7 +230,7 @@ namespace LibraryLoader
             {
                 return FProcess.GetProcess(m_processName);
             }
-            else if (m_processId != 0)
+            else if (m_processId > 0)
             {
                 return FProcess.GetProcess(m_processId);
             }
@@ -302,7 +302,7 @@ namespace LibraryLoader
         {
             if (!string.IsNullOrEmpty(m_libraryFile) && (m_status != StatusTypes.LoadSuccess) && (m_status != StatusTypes.LoadFailure))
             {
-                return ((m_autoLoad && !string.IsNullOrEmpty(m_processName)) || (m_processId != 0));
+                return ((m_autoLoad && !string.IsNullOrEmpty(m_processName)) || (m_processId > 0));
             }
 
             return false;

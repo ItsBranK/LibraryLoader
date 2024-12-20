@@ -181,10 +181,11 @@
             PIDBx.Font = new System.Drawing.Font("Segoe UI", 9.75F);
             PIDBx.ForeColor = System.Drawing.Color.Black;
             PIDBx.Location = new System.Drawing.Point(316, 20);
-            PIDBx.Maximum = new decimal(new int[] { 100000, 0, 0, 0 });
+            PIDBx.Maximum = new decimal(new int[] { 1000000, 0, 0, 0 });
             PIDBx.Name = "PIDBx";
             PIDBx.Size = new System.Drawing.Size(64, 25);
             PIDBx.TabIndex = 13;
+            PIDBx.Value = new decimal(new int[] { 1, 0, 0, 0 });
             PIDBx.KeyUp += PIDBx_KeyUp;
             // 
             // ProcessBx
@@ -281,5 +282,7 @@
         private System.Windows.Forms.Timer ProcessTmr;
         private System.Windows.Forms.MenuStrip MenuStrp;
         private System.Windows.Forms.ToolStripMenuItem AboutMenuItem;
+        private System.Windows.Forms.PictureBox FileImg;
+        private System.Windows.Forms.PictureBox pictureBox1;
     }
 }

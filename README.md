@@ -1,7 +1,7 @@
-# ItsBranK's Library Loader v1.1
-### .NET 8.0 Windows
+# ItsBranK's Library Loader v1.2
+### .NET 9.0 Windows
 
-A very simple and easy to use DLL injector that uses Manual Mapping, written in C#.
+A simple and easy to use DLL injector that uses LoadLibraryA, written in C#.
 
 # Features
 
