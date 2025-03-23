@@ -12,11 +12,18 @@ namespace LibraryLoader.Framework
 
         public static bool IsValidProcess(Process process)
         {
-            if ((process != null)
-                && (process.Id > 8) // A process with an id of 8 or lower is a system process, we shouldn't be trying to access those.
-                && (process.MainWindowHandle != IntPtr.Zero))
+            try
             {
-                return true;
+                if ((process != null)
+                    && (process.Id > 8) // A process with an id of 8 or lower is a system process, we shouldn't be trying to access those.
+                    && (process.MainWindowHandle != IntPtr.Zero))
+                {
+                    return true;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Most likely an access denied exception, which we don't need to do anything for.
             }
 
             return false;
